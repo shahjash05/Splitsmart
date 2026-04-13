@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SplitSmart - Group Expense Sharing Made Easy</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="loading-screen">
+        <div class="loading-spinner"></div>
+        <p>Loading SplitSmart...</p>
+    </div>
+
+    <!-- Authentication Container -->
+    <div id="auth-container" class="auth-container">
+        <!-- Login Page -->
+        <div id="login-page" class="auth-page">
+            <div class="auth-card">
+                <div class="auth-header">
+                    <div class="logo">
+                        <i class="fas fa-hand-holding-usd"></i>
+                        <h1>SplitSmart</h1>
+                    </div>
+                    <p class="tagline">Split expenses, share fairly</p>
+                </div>
+                <form id="login-form" class="auth-form">
+                    <div class="form-group">
+                        <label for="login-email">Email</label>
+                        <input type="email" id="login-email" placeholder="Enter your email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="login-password">Password</label>
+                        <input type="password" id="login-password" placeholder="Enter your password" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">Login</button>
+                </form>
+                <div class="auth-footer">
+                    <p>Don't have an account? <a href="#" id="show-signup">Sign up</a></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Signup Page -->
+        <div id="signup-page" class="auth-page hidden">
+            <div class="auth-card">
+                <div class="auth-header">
+                    <div class="logo">
+                        <i class="fas fa-hand-holding-usd"></i>
+                        <h1>SplitSmart</h1>
+                    </div>
+                    <p class="tagline">Create your account</p>
+                </div>
+                <form id="signup-form" class="auth-form">
+                    <div class="form-group">
+                        <label for="signup-name">Full Name</label>
+                        <input type="text" id="signup-name" placeholder="Enter your name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="signup-email">Email</label>
+                        <input type="email" id="signup-email" placeholder="Enter your email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="signup-password">Password</label>
+                        <input type="password" id="signup-password" placeholder="Create a password" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="signup-confirm">Confirm Password</label>
+                        <input type="password" id="signup-confirm" placeholder="Confirm your password" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">Sign Up</button>
+                </form>
+                <div class="auth-footer">
+                    <p>Already have an account? <a href="#" id="show-login">Login</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Application Container -->
+    <div id="app-container" class="app-container hidden">
+        <!-- Navigation Bar -->
+        <nav class="navbar">
+            <div class="nav-brand">
+                <i class="fas fa-hand-holding-usd"></i>
+                <span>SplitSmart</span>
+            </div>
+            <div class="nav-menu">
+                <a href="#dashboard" class="nav-link active" data-page="dashboard">
+                    <i class="fas fa-home"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="#groups" class="nav-link" data-page="groups">
+                    <i class="fas fa-users"></i>
+                    <span>Groups</span>
+                </a>
+                <a href="#expenses" class="nav-link" data-page="expenses">
+                    <i class="fas fa-receipt"></i>
+                    <span>Expenses</span>
+                </a>
+                <a href="#settlements" class="nav-link" data-page="settlements">
+                    <i class="fas fa-handshake"></i>
+                    <span>Settlements</span>
+                </a>
+                <a href="#profile" class="nav-link" data-page="profile">
+                    <i class="fas fa-user"></i>
+                    <span>Profile</span>
+                </a>
+            </div>
+            <div class="nav-user">
+                <div class="user-info">
+                    <span class="user-name" id="current-user-name">John Doe</span>
+                    <button class="btn btn-sm btn-text" id="logout-btn">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Dashboard Page -->
+            <div id="dashboard-page" class="page active">
+                <div class="page-header">
+                    <h1>Dashboard</h1>
+                    <button class="btn btn-primary" id="quick-add-expense-btn">
+                        <i class="fas fa-plus"></i> Quick Add Expense
+                    </button>
+                </div>
+
+                <!-- Monthly Limit Warning -->
+                <div id="limit-warning" class="alert alert-warning hidden">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <span>Warning: You've spent <strong id="warning-percentage">85%</strong> of your monthly limit!</span>
+                </div>
+
+                <!-- Overview Cards -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background-color: #3b82f6;">
+                            <i class="fas fa-wallet"></i>
+                        </div>
+                        <div class="stat-content">
+                            <p class="stat-label">Total Expenses</p>
+                            <h3 class="stat-value" id="total-expenses">₹0</h3>
+                            <p class="stat-change positive">This Month</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background-color: #10b981;">
+                            <i class="fas fa-arrow-up"></i>
+                        </div>
+                        <div class="stat-content">
+                            <p class="stat-label">You're Owed</p>
+                            <h3 class="stat-value positive" id="amount-owed">₹0</h3>
+                            <p class="stat-change">From others</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background-color: #ef4444;">
+                            <i class="fas fa-arrow-down"></i>
+                        </div>
+                        <div class="stat-content">
+                            <p class="stat-label">You Owe</p>
+                            <h3 class="stat-value negative" id="amount-owing">₹0</h3>
+                            <p class="stat-change">To others</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background-color: #8b5cf6;">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="stat-content">
+                            <p class="stat-label">Active Groups</p>
+                            <h3 class="stat-value" id="active-groups">0</h3>
+                            <p class="stat-change">Currently joined</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Activity & Balances -->
+                <div class="dashboard-grid">
+                    <div class="dashboard-section">
+                        <div class="section-header">
+                            <h2>Recent Expenses</h2>
+                            <a href="#expenses" class="btn btn-sm btn-text">View All</a>
+                        </div>
+                        <div class="expense-list" id="recent-expenses">
+                            <!-- Populated by JavaScript -->
+                        </div>
+                    </div>
+
+                    <div class="dashboard-section">
+                        <div class="section-header">
+                            <h2>Your Balances</h2>
+                        </div>
+                        <div class="balance-list" id="balance-summary">
+                            <!-- Populated by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Groups Page -->
+            <div id="groups-page" class="page">
+                <div class="page-header">
+                    <h1>Groups</h1>
+                    <button class="btn btn-primary" id="create-group-btn">
+                        <i class="fas fa-plus"></i> Create Group
+                    </button>
+                </div>
+
+                <div class="groups-grid" id="groups-container">
+                    <!-- Populated by JavaScript -->
+                </div>
+            </div>
+
+            <!-- Expenses Page -->
+            <div id="expenses-page" class="page">
+                <div class="page-header">
+                    <h1>Expenses</h1>
+                    <button class="btn btn-primary" id="add-expense-btn">
+                        <i class="fas fa-plus"></i> Add Expense
+                    </button>
+                </div>
+
+                <div class="tabs">
+                    <button class="tab-btn active" data-tab="all-expenses">All Expenses</button>
+                    <button class="tab-btn" data-tab="personal-expenses">Personal</button>
+                    <button class="tab-btn" data-tab="group-expenses">Group</button>
+                </div>
+
+                <div class="expenses-filters">
+                    <select id="expense-group-filter" class="form-select">
+                        <option value="">All Groups</option>
+                    </select>
+                    <select id="expense-category-filter" class="form-select">
+                        <option value="">All Categories</option>
+                    </select>
+                    <input type="search" id="expense-search" class="form-input" placeholder="Search expenses...">
+                </div>
+
+                <div class="expenses-list" id="expenses-container">
+                    <!-- Populated by JavaScript -->
+                </div>
+            </div>
+
+            <!-- Settlements Page -->
+            <div id="settlements-page" class="page">
+                <div class="page-header">
+                    <h1>Settlements</h1>
+                    <button class="btn btn-primary" id="create-settlement-btn">
+                        <i class="fas fa-plus"></i> Create Settlement
+                    </button>
+                </div>
+
+                <div class="tabs">
+                    <button class="tab-btn active" data-tab="pending-settlements">Pending</button>
+                    <button class="tab-btn" data-tab="confirmed-settlements">Confirmed</button>
+                    <button class="tab-btn" data-tab="rejected-settlements">Rejected</button>
+                </div>
+
+                <div class="settlements-list" id="settlements-container">
+                    <!-- Populated by JavaScript -->
+                </div>
+            </div>
+
+            <!-- Profile Page -->
+            <div id="profile-page" class="page">
+                <div class="page-header">
+                    <h1>Profile Settings</h1>
+                </div>
+
+                <div class="profile-grid">
+                    <div class="profile-section">
+                        <h2>Account Information</h2>
+                        <form id="profile-form">
+                            <div class="form-group">
+                                <label for="profile-name">Full Name</label>
+                                <input type="text" id="profile-name" class="form-input" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="profile-email">Email</label>
+                                <input type="email" id="profile-email" class="form-input" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Update Profile</button>
+                        </form>
+                    </div>
+
+                    <div class="profile-section">
+                        <h2>Monthly Spending Limit</h2>
+                        <form id="limit-form">
+                            <div class="form-group">
+                                <label for="monthly-limit">Set your monthly limit</label>
+                                <input type="number" id="monthly-limit" class="form-input" placeholder="Enter amount" min="0" step="0.01">
+                            </div>
+                            <div class="limit-info">
+                                <p>Current Month: <strong id="current-month-spending">₹0</strong></p>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" id="limit-progress" style="width: 0%"></div>
+                                </div>
+                                <p class="limit-percentage" id="limit-percentage-text">0% of limit used</p>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Update Limit</button>
+                        </form>
+                    </div>
+
+                    <div class="profile-section">
+                        <h2>Change Password</h2>
+                        <form id="password-form">
+                            <div class="form-group">
+                                <label for="current-password">Current Password</label>
+                                <input type="password" id="current-password" class="form-input" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="new-password">New Password</label>
+                                <input type="password" id="new-password" class="form-input" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="confirm-new-password">Confirm New Password</label>
+                                <input type="password" id="confirm-new-password" class="form-input" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Change Password</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modals -->
+    <!-- Create Group Modal -->
+    <div id="create-group-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Create New Group</h2>
+                <button class="modal-close" data-modal="create-group-modal">&times;</button>
+            </div>
+            <form id="create-group-form">
+                <div class="form-group">
+                    <label for="group-name">Group Name</label>
+                    <input type="text" id="group-name" class="form-input" placeholder="e.g., Roommates, Trip to Paris" required>
+                </div>
+                <div class="form-group">
+                    <label>Add Members (Email)</label>
+                    <div class="member-input-container">
+                        <input type="email" id="member-email" class="form-input" placeholder="Enter member's email">
+                        <button type="button" class="btn btn-secondary" id="add-member-btn">Add</button>
+                    </div>
+                    <div id="members-list" class="members-list"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-text" data-modal="create-group-modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Create Group</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add/Edit Expense Modal -->
+    <div id="expense-modal" class="modal">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h2 id="expense-modal-title">Add Expense</h2>
+                <button class="modal-close" data-modal="expense-modal">&times;</button>
+            </div>
+            <form id="expense-form">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="expense-description">Description</label>
+                        <input type="text" id="expense-description" class="form-input" placeholder="What's this expense for?" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="expense-amount">Total Amount</label>
+                        <input type="number" id="expense-amount" class="form-input" placeholder="0.00" min="0" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="expense-category">Category</label>
+                        <select id="expense-category" class="form-select" required>
+                            <option value="">Select Category</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="expense-date">Date</label>
+                        <input type="date" id="expense-date" class="form-input" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="expense-group">Group (Optional)</label>
+                    <select id="expense-group" class="form-select">
+                        <option value="">Personal Expense</option>
+                        <option value="">Group Expense</option>
+                    </select>
+                </div>
+
+                <div id="group-expense-options" class="hidden">
+                    <div class="form-group">
+                        <label>Who Paid?</label>
+                        <div id="payers-container"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Split Method</label>
+                        <div class="radio-group">
+                            <label class="radio-label">
+                                <input type="radio" name="split-method" value="equal" checked>
+                                <span>Split Equally</span>
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="split-method" value="manual">
+                                <span>Manual Split</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Participants</label>
+                        <div id="participants-container"></div>
+                    </div>
+
+                    <div id="manual-split-container" class="hidden">
+                        <label>Enter amounts for each participant</label>
+                        <div id="manual-split-inputs"></div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-text" data-modal="expense-modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Expense</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Create Settlement Modal -->
+    <div id="settlement-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Create Settlement</h2>
+                <button class="modal-close" data-modal="settlement-modal">&times;</button>
+            </div>
+            <form id="settlement-form">
+                <div class="form-group">
+                    <label for="settlement-receiver">Pay To</label>
+                    <select id="settlement-receiver" class="form-select" required>
+                        <option value="">Select person</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="settlement-amount">Amount</label>
+                    <input type="number" id="settlement-amount" class="form-input" placeholder="0.00" min="0" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label for="settlement-group">Group (Optional)</label>
+                    <select id="settlement-group" class="form-select">
+                        <option value="">Global Settlement</option>
+                    </select>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-text" data-modal="settlement-modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Create Settlement</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Group Details Modal -->
+    <div id="group-details-modal" class="modal">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h2 id="group-details-title">Group Details</h2>
+                <button class="modal-close" data-modal="group-details-modal">&times;</button>
+            </div>
+            <div class="group-details-content">
+                <div class="tabs">
+                    <button class="tab-btn active" data-tab="group-members">Members</button>
+                    <button class="tab-btn" data-tab="group-expenses">Expenses</button>
+                    <button class="tab-btn" data-tab="group-balances">Balances</button>
+                </div>
+
+                <div id="group-members" class="tab-content active">
+                    <div class="section-header">
+                        <button class="btn btn-secondary btn-sm" id="edit-group-members-btn" style="margin-bottom: 16px;">
+                            <i class="fas fa-user-edit"></i> Edit Members
+                        </button>
+                    </div>
+                    <div class="members-grid" id="group-members-list"></div>
+                </div>
+
+                <div id="group-expenses" class="tab-content">
+                    <div class="expenses-list" id="group-expenses-list"></div>
+                </div>
+
+                <div id="group-balances" class="tab-content">
+                    <div class="balances-grid" id="group-balances-list"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" id="leave-group-btn">Leave Group</button>
+                <button type="button" class="btn btn-text" data-modal="group-details-modal">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Group Members Modal -->
+    <div id="edit-members-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Edit Group Members</h2>
+                <button class="modal-close" data-modal="edit-members-modal">&times;</button>
+            </div>
+            <form id="edit-members-form">
+                <div class="form-group">
+                    <label>Current Members</label>
+                    <div id="current-members-list" class="members-list"></div>
+                </div>
+                <div class="form-group">
+                    <label>Add New Members (Email)</label>
+                    <div class="member-input-container">
+                        <input type="email" id="new-member-email" class="form-input" placeholder="Enter member's email">
+                        <button type="button" class="btn btn-secondary" id="add-new-member-btn">Add</button>
+                    </div>
+                    <div id="new-members-list" class="members-list"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-text" data-modal="edit-members-modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="toast"></div>
+
+    <!-- Scripts -->
+    <script src="js/data.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
