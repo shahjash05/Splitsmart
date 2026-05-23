@@ -3,7 +3,7 @@
 // Replaces mock data with real backend calls
 // =============================================
 
-const API_BASE = 'http://localhost:8080/api';
+const API_BASE = 'https://splitsmart-ud5i.onrender.com/api';
 
 // ===== Token Management =====
 const Auth = {
