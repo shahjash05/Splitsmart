@@ -1,3 +1,4 @@
+
 /* =============================================
    SplitSmart - Modern Expense Sharing CSS
    ============================================= */
@@ -33,6 +34,29 @@
     --transition: all 0.3s ease;
 }
 
+/* ===== Dark Mode Variables ===== */
+[data-theme="dark"] {
+    --bg-primary: #1a1d27;
+    --bg-secondary: #141620;
+    --bg-tertiary: #21253a;
+
+    --text-primary: #f1f5f9;
+    --text-secondary: #94a3b8;
+    --text-tertiary: #64748b;
+
+    --border-color: #2d3250;
+
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.4);
+    --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.5), 0 1px 2px -1px rgba(0, 0, 0, 0.4);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -2px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -4px rgba(0, 0, 0, 0.4);
+    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.6), 0 8px 10px -6px rgba(0, 0, 0, 0.5);
+}
+
+[data-theme="dark"] body {
+    color-scheme: dark;
+}
+
 /* ===== Global Styles ===== */
 * {
     margin: 0;
@@ -46,6 +70,7 @@ body {
     color: var(--text-primary);
     line-height: 1.6;
     overflow-x: hidden;
+    transition: background-color 0.4s ease, color 0.4s ease;
 }
 
 /* ===== Loading Screen ===== */
@@ -375,6 +400,89 @@ body {
     display: flex;
     align-items: center;
     gap: 16px;
+}
+
+/* ===== Dark Mode Toggle ===== */
+.theme-toggle {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    border-radius: 999px;
+    transition: var(--transition);
+}
+
+.theme-toggle:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 3px;
+}
+
+.toggle-track {
+    display: flex;
+    align-items: center;
+    width: 56px;
+    height: 28px;
+    border-radius: 999px;
+    background: linear-gradient(135deg, #f3a602 0%, #f59e0b 100%);
+    position: relative;
+    padding: 3px;
+    transition: background 0.4s ease, box-shadow 0.4s ease;
+    box-shadow: 0 0 8px rgba(245, 158, 11, 0.5);
+}
+
+[data-theme="dark"] .toggle-track {
+    background: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%);
+    box-shadow: 0 0 10px rgba(99, 102, 241, 0.6);
+}
+
+.toggle-thumb {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    left: 3px;
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.25);
+    overflow: hidden;
+}
+
+[data-theme="dark"] .toggle-thumb {
+    transform: translateX(28px);
+}
+
+.toggle-icon-light,
+.toggle-icon-dark {
+    position: absolute;
+    font-size: 11px;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.toggle-icon-light {
+    color: #f59e0b;
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+}
+
+.toggle-icon-dark {
+    color: #6366f1;
+    opacity: 0;
+    transform: scale(0) rotate(-45deg);
+}
+
+[data-theme="dark"] .toggle-icon-light {
+    opacity: 0;
+    transform: scale(0) rotate(45deg);
+}
+
+[data-theme="dark"] .toggle-icon-dark {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
 }
 
 .user-info {
@@ -1380,6 +1488,64 @@ body {
 /* ===== Utility Classes ===== */
 .hidden {
     display: none !important;
+}
+
+/* ===== Dark Mode Overrides ===== */
+[data-theme="dark"] .alert-warning {
+    background-color: #422006;
+    color: #fde68a;
+}
+
+[data-theme="dark"] .alert-success {
+    background-color: #064e3b;
+    color: #a7f3d0;
+}
+
+[data-theme="dark"] .alert-danger {
+    background-color: #450a0a;
+    color: #fecaca;
+}
+
+[data-theme="dark"] .badge-group {
+    background-color: #1e3a5f;
+    color: #93c5fd;
+}
+
+[data-theme="dark"] .badge-personal {
+    background-color: #3b0764;
+    color: #d8b4fe;
+}
+
+[data-theme="dark"] .settlement-icon.pending {
+    background-color: #422006;
+    color: #fbbf24;
+}
+
+[data-theme="dark"] .settlement-icon.confirmed {
+    background-color: #064e3b;
+    color: #34d399;
+}
+
+[data-theme="dark"] .settlement-icon.rejected {
+    background-color: #450a0a;
+    color: #f87171;
+}
+
+[data-theme="dark"] .modal-footer {
+    background-color: var(--bg-tertiary);
+}
+
+[data-theme="dark"] .member-tag.member-new {
+    background-color: #064e3b;
+    border-color: #059669;
+}
+
+[data-theme="dark"] .member-tag.member-removed {
+    background-color: #450a0a;
+}
+
+[data-theme="dark"] .limit-info {
+    background-color: var(--bg-tertiary);
 }
 
 .empty-state {

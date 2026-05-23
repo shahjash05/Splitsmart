@@ -8,27 +8,42 @@ echo    SplitSmart - Full Stack App Launcher
 echo  ============================================
 echo.
 
-:: Skip port killing (to avoid crash)
-echo [0/2] Skipping port check (safe mode)...
-echo  Make sure port 8080 is free!
-echo.
+:: -----------------------------------------------
+:: Step 1: Verify MySQL service is running
+:: -----------------------------------------------
+echo [1/2] Checking MySQL81 service...
 
-:: Step 1: Start MySQL
-echo [1/2] Starting MySQL Server...
-tasklist /FI "IMAGENAME eq mysqld.exe" 2>NUL | find /I "mysqld.exe" >NUL
-
-if "%ERRORLEVEL%"=="0" (
-    echo  MySQL is already running!
+sc query MySQL81 | find "RUNNING" >NUL 2>&1
+if not errorlevel 1 (
+    echo  MySQL81 service is running!
 ) else (
-    start "" "C:\Program Files\MySQL\MySQL Server 8.0\bin\mysqld.exe" --datadir="C:\ProgramData\MySQL\MySQL Server 8.0\Data" --port=3306
-    echo  MySQL starting... waiting 6 seconds...
-    timeout /t 6 >nul
-    echo  MySQL started!
+    echo  ERROR: MySQL81 service is not running!
+    echo  It should auto-start with Windows.
+    echo  Open Services [services.msc] and start MySQL81 manually.
+    echo.
+    pause
+    exit /b 1
 )
 
 echo.
+
+:: -----------------------------------------------
+:: Step 2: Start Spring Boot
+:: -----------------------------------------------
 echo [2/2] Starting Spring Boot Backend on port 8080...
-echo  Wait for "Started SplitSmartApplication" then open index.html
+echo.
+
+:: Check if port 8080 is already in use (specifically looking for LISTENING state)
+netstat -ano | find ":8080 " | find "LISTENING" >NUL 2>&1
+if not errorlevel 1 (
+    echo  WARNING: Port 8080 is already in use!
+    echo  Please close the application using port 8080 and try again.
+    echo.
+    pause
+    exit /b 1
+)
+
+echo  Wait for "Started SplitSmartApplication" message.
 echo.
 echo  Frontend: %~dp0index.html
 echo  Backend:  http://localhost:8080
@@ -37,8 +52,23 @@ echo.
 echo  ============================================
 echo.
 
+:: Open frontend in default browser
+start "" "%~dp0index.html"
+
 cd /d "%~dp0splitsmart-backend"
 
-mvn spring-boot:run
+call mvn spring-boot:run
+
+if errorlevel 1 (
+    echo.
+    echo  ============================================
+    echo  ERROR: Spring Boot failed to start!
+    echo  Common issues:
+    echo    - MySQL not running (check services.msc for MySQL81)
+    echo    - Port 8080 already in use
+    echo    - Missing dependencies (run: mvn clean install)
+    echo  ============================================
+    echo.
+)
 
 pause

@@ -14,15 +14,15 @@ const Auth = {
 };
 
 // ===== API Helper =====
-async function apiCall(method, endpoint, body = null) {
+async function apiCall(method, endpoint, body = null) {    //method used for get,post,put/delete ||  endpoint is basically the api path || body data to send
     const headers = { 'Content-Type': 'application/json' };
     const token = Auth.getToken();
-    if (token) headers['Authorization'] = `Bearer ${token}`;
+    if (token) headers['Authorization'] = `Bearer ${token}`;    //used for adding jwt token so if  token exits it adds auth. heaader which is used for protected routes.
 
     const options = { method, headers };
-    if (body) options.body = JSON.stringify(body);
+    if (body) options.body = JSON.stringify(body);   //converts js to json
 
-    const res = await fetch(API_BASE + endpoint, options);
+    const res = await fetch(API_BASE + endpoint, options);  //calls backennd api
 
     if (res.status === 204) return null; // No content
 
@@ -35,22 +35,22 @@ async function apiCall(method, endpoint, body = null) {
 }
 
 // ===== Utility Formatters =====
-const DataHelpers = {
-    formatCurrency(amount) {
+const DataHelpers = {  
+    formatCurrency(amount) {  // used for formatting the currency into inr
         return new Intl.NumberFormat('en-IN', {
             style: 'currency',
             currency: 'INR'
         }).format(amount || 0);
     },
 
-    formatDate(dateStr) {
+    formatDate(dateStr) {    
         if (!dateStr) return '';
         return new Date(dateStr).toLocaleDateString('en-US', {
             year: 'numeric', month: 'short', day: 'numeric'
         });
     },
 
-    getUserInitials(name) {
+    getUserInitials(name) {               // related to js
         if (!name) return '?';
         return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
     }
