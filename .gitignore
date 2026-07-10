@@ -19,3 +19,5 @@ Desktop.ini
 # Temporary files and logs
 *.log
 query
+
+.vercel

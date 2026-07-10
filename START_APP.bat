@@ -11,18 +11,22 @@ echo.
 :: -----------------------------------------------
 :: Step 1: Verify MySQL service is running
 :: -----------------------------------------------
-echo [1/2] Checking MySQL81 service...
+echo [1/2] Checking MySQL service...
 
-sc query MySQL81 | find "RUNNING" >NUL 2>&1
+sc query MySQL80 | find "RUNNING" >NUL 2>&1
 if not errorlevel 1 (
-    echo  MySQL81 service is running!
+    echo  MySQL80 service is running!
 ) else (
-    echo  ERROR: MySQL81 service is not running!
-    echo  It should auto-start with Windows.
-    echo  Open Services [services.msc] and start MySQL81 manually.
-    echo.
-    pause
-    exit /b 1
+    sc query MySQL81 | find "RUNNING" >NUL 2>&1
+    if not errorlevel 1 (
+        echo  MySQL81 service is running!
+    ) else (
+        echo  ERROR: MySQL service is not running!
+        echo  Please open Services [services.msc] and start MySQL80 or MySQL81 manually.
+        echo.
+        pause
+        exit /b 1
+    )
 )
 
 echo.
@@ -64,7 +68,7 @@ if errorlevel 1 (
     echo  ============================================
     echo  ERROR: Spring Boot failed to start!
     echo  Common issues:
-    echo    - MySQL not running (check services.msc for MySQL81)
+    echo    - MySQL not running (check services.msc for MySQL80/MySQL81)
     echo    - Port 8080 already in use
     echo    - Missing dependencies (run: mvn clean install)
     echo  ============================================

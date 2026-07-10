@@ -160,8 +160,6 @@ function renderRecentExpenses(expenses) {
         return;
     }
     container.innerHTML = expenses.map(e => {
-        const userPart = (e.participants || []).find(p => p.userId === AppState.currentUser.userId);
-        const diff = userPart ? (userPart.paidAmount - userPart.owedAmount) : 0;
         return `
         <div class="expense-item">
             <div class="expense-icon" style="background-color:#e0e7ff"><i class="fas fa-receipt"></i></div>
@@ -172,8 +170,8 @@ function renderRecentExpenses(expenses) {
                     ${e.groupName ? `<span>• ${e.groupName}</span>` : '<span>• Personal</span>'}
                 </div>
             </div>
-            <div class="expense-amount ${diff >= 0 ? 'positive' : 'negative'}">
-                ${diff >= 0 ? '+' : ''}${DataHelpers.formatCurrency(Math.abs(diff))}
+            <div class="expense-amount">
+                ${DataHelpers.formatCurrency(e.totalAmount)}
             </div>
         </div>`;
     }).join('');
