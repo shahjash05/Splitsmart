@@ -12,5 +12,5 @@ jobs:
     steps:
       - name: Ping API Endpoint
         run: |
-          # We ping an unsecured endpoint that returns a fast response
-          curl -s -o /dev/null -w "%{http_code}" https://splitsmart-ud5i.onrender.com/api/categories
+          # We ping the dedicated public ping endpoint
+          curl -s -o /dev/null -w "%{http_code}" https://splitsmart-ud5i.onrender.com/api/auth/ping
