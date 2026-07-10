@@ -61,7 +61,8 @@ public class AuthService {
 
     public AuthResponse login(LoginRequest request) {
         User user = userRepository.findByUsername(request.getUsername())
-                .orElseThrow(() -> new ResourceNotFoundException("No account found for username: " + request.getUsername()));
+                .orElseGet(() -> userRepository.findByEmail(request.getUsername())
+                .orElseThrow(() -> new ResourceNotFoundException("No account found for username or email: " + request.getUsername())));
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             throw new BadRequestException("Invalid password");
