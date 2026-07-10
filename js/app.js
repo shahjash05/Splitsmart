@@ -402,7 +402,7 @@ async function loadGroupExpensesTab(groupId) {
             container.innerHTML = '<div class="empty-state"><p>No expenses in this group yet</p></div>';
             return;
         }
-        container.innerHTML = expenses.map(e => `
+        container.innerHTML = expenses.slice(0, 50).map(e => `
             <div class="expense-item">
                 <div class="expense-icon" style="background-color:#e0e7ff"><i class="fas fa-receipt"></i></div>
                 <div class="expense-details">
@@ -427,7 +427,7 @@ async function loadGroupBalancesTab(groupId) {
             container.innerHTML = '<div class="empty-state"><p>All settled up!</p></div>';
             return;
         }
-        container.innerHTML = balances.map(b => `
+        container.innerHTML = balances.slice(0, 50).map(b => `
             <div class="balance-item">
                 <div class="balance-info">
                     <div class="balance-avatar">${DataHelpers.getUserInitials(b.otherUserName)}</div>
@@ -476,12 +476,15 @@ function renderExpenses(expenses) {
         <div class="empty-state">
             <i class="fas fa-receipt"></i>
             <h3>No expenses found</h3>
-            <p>Add your first expense to get started</p>
+            <p>You haven't added any expenses matching this criteria.</p>
+            <button class="btn btn-primary" onclick="openExpenseModal()">
+                <i class="fas fa-plus"></i> Add Expense
+            </button>
         </div>`;
         return;
     }
 
-    container.innerHTML = expenses.map(e => {
+    container.innerHTML = expenses.slice(0, 50).map(e => {
         const isCreator = e.createdById === userId;
         return `
         <div class="expense-card">
@@ -599,12 +602,12 @@ function renderSettlements(settlements) {
         <div class="empty-state">
             <i class="fas fa-handshake"></i>
             <h3>No settlements found</h3>
-            <p>All payments are up to date</p>
+            <p>There are no settlements matching this status.</p>
         </div>`;
         return;
     }
 
-    container.innerHTML = settlements.map(s => {
+    container.innerHTML = settlements.slice(0, 50).map(s => {
         const isReceiver = s.receiverId === userId;
         const icon = s.status === 'CONFIRMED' ? 'check' : s.status === 'REJECTED' ? 'times' : 'clock';
         return `
@@ -828,9 +831,10 @@ function initModals() {
     document.getElementById('profile-form').addEventListener('submit', async (e) => {
         e.preventDefault();
         const name = document.getElementById('profile-name').value;
+        const username = document.getElementById('profile-username').value;
         const email = document.getElementById('profile-email').value;
         try {
-            const user = await UserAPI.update({ name, email });
+            const user = await UserAPI.update({ name, username, email });
             AppState.currentUser = { ...AppState.currentUser, ...user };
             document.getElementById('current-user-name').textContent = user.name;
             showToast('Profile updated!');
