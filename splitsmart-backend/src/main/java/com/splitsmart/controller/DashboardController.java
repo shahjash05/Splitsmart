@@ -3,6 +3,7 @@ package com.splitsmart.controller;
 import com.splitsmart.dto.response.BalanceDTO;
 import com.splitsmart.dto.response.DashboardDTO;
 import com.splitsmart.dto.response.ExpenseDTO;
+import com.splitsmart.dto.response.SettlementDTO;
 import com.splitsmart.exception.ResourceNotFoundException;
 import com.splitsmart.model.Group;
 import com.splitsmart.model.User;
@@ -10,6 +11,7 @@ import com.splitsmart.repository.GroupRepository;
 import com.splitsmart.service.BalanceService;
 import com.splitsmart.service.ExpenseService;
 import com.splitsmart.service.GroupService;
+import com.splitsmart.service.SettlementService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -28,6 +30,7 @@ public class DashboardController {
     private final BalanceService balanceService;
     private final GroupService groupService;
     private final GroupRepository groupRepository;
+    private final SettlementService settlementService;
 
     @GetMapping("/dashboard")
     public ResponseEntity<DashboardDTO> getDashboard(@AuthenticationPrincipal User user) {
@@ -57,6 +60,10 @@ public class DashboardController {
 
         int activeGroups = groupService.getUserGroups(user).size();
 
+        // Fetch pending settlements for reminder pop-ups
+        List<SettlementDTO> pendingSettlements = settlementService.getUserSettlements(user, "PENDING");
+        int pendingCount = pendingSettlements.size();
+
         DashboardDTO dto = DashboardDTO.builder()
                 .totalExpensesThisMonth(monthlyTotal)
                 .totalOwed(totalOwed)
@@ -67,6 +74,8 @@ public class DashboardController {
                 .nearLimit(nearLimit)
                 .recentExpenses(recent)
                 .balances(balances)
+                .pendingSettlementCount(pendingCount)
+                .pendingSettlements(pendingSettlements)
                 .build();
 
         return ResponseEntity.ok(dto);

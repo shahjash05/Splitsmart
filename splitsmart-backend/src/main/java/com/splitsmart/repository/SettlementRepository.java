@@ -18,4 +18,8 @@ public interface SettlementRepository extends JpaRepository<Settlement, Long> {
 
     @Query("SELECT s FROM Settlement s WHERE ((s.payer = :u1 AND s.receiver = :u2) OR (s.payer = :u2 AND s.receiver = :u1)) AND s.status = :status")
     List<Settlement> findConfirmedBetween(@Param("u1") User u1, @Param("u2") User u2, @Param("status") Status status);
+
+    List<Settlement> findByGroup(Group group);
+
+    void deleteByGroup(Group group);
 }

@@ -12,6 +12,7 @@ import com.splitsmart.model.User;
 import com.splitsmart.repository.ExpenseRepository;
 import com.splitsmart.repository.GroupMembershipRepository;
 import com.splitsmart.repository.GroupRepository;
+import com.splitsmart.repository.SettlementRepository;
 import com.splitsmart.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +29,7 @@ public class GroupService {
     private final GroupMembershipRepository membershipRepository;
     private final UserRepository userRepository;
     private final ExpenseRepository expenseRepository;
+    private final SettlementRepository settlementRepository;
 
     @Transactional
     public GroupDTO createGroup(User creator, CreateGroupRequest req) {
@@ -111,6 +113,24 @@ public class GroupService {
         }
 
         membershipRepository.deleteByUserAndGroup(currentUser, group);
+    }
+
+    @Transactional
+    public void deleteGroup(Long groupId, User currentUser) {
+        Group group = findGroupOrThrow(groupId);
+
+        if (!group.getCreatedBy().getUserId().equals(currentUser.getUserId())) {
+            throw new UnauthorizedException("Only the group creator (admin) can delete the group");
+        }
+
+        // Delete settlements linked to this group
+        settlementRepository.deleteByGroup(group);
+
+        // Delete expenses (participations cascade via JPA orphanRemoval)
+        expenseRepository.deleteByGroup(group);
+
+        // Delete memberships and the group itself (cascade via JPA)
+        groupRepository.delete(group);
     }
 
     private Group findGroupOrThrow(Long groupId) {

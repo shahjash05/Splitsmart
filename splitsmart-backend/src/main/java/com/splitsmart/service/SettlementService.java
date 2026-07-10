@@ -27,13 +27,27 @@ public class SettlementService {
     private final GroupRepository groupRepository;
 
     @Transactional
-    public SettlementDTO create(User payer, CreateSettlementRequest req) {
-        if (req.getReceiverId().equals(payer.getUserId())) {
-            throw new BadRequestException("Payer and receiver cannot be the same user");
+    public SettlementDTO create(User currentUser, CreateSettlementRequest req) {
+        User payer;
+        User receiver;
+
+        if (req.getPayerId() != null) {
+            // Take From: current user is receiving, other person is paying
+            payer = userRepository.findById(req.getPayerId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Payer not found"));
+            receiver = currentUser;
+        } else if (req.getReceiverId() != null) {
+            // Pay To: current user is paying, other person is receiving
+            payer = currentUser;
+            receiver = userRepository.findById(req.getReceiverId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Receiver not found"));
+        } else {
+            throw new BadRequestException("Must provide either payerId or receiverId");
         }
 
-        User receiver = userRepository.findById(req.getReceiverId())
-                .orElseThrow(() -> new ResourceNotFoundException("Receiver not found"));
+        if (payer.getUserId().equals(receiver.getUserId())) {
+            throw new BadRequestException("Payer and receiver cannot be the same user");
+        }
 
         Group group = null;
         if (req.getGroupId() != null) {

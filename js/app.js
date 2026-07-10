@@ -32,16 +32,26 @@ function closeModal(id) { document.getElementById(id)?.classList.remove('active'
 
 // ===== Auth =====
 function initAuth() {
+    // Check for reset password token in URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const tokenParam = urlParams.get('token');
+    if (tokenParam) {
+        document.getElementById('login-page').classList.add('hidden');
+        document.getElementById('reset-password-page').classList.remove('hidden');
+        // Clear param from URL without reloading
+        window.history.replaceState({}, document.title, window.location.pathname);
+    }
+
     document.getElementById('login-form').addEventListener('submit', async (e) => {
         e.preventDefault();
-        const email = document.getElementById('login-email').value;
+        const username = document.getElementById('login-username').value;
         const password = document.getElementById('login-password').value;
         try {
-            const res = await AuthAPI.login({ email, password });
+            const res = await AuthAPI.login({ username, password });
             Auth.setToken(res.token);
             AppState.currentUser = res;
             AppState.isAuthenticated = true;
-            showApp();
+            checkUserSetupAndShowApp();
             showToast(`Welcome back, ${res.name}!`);
         } catch (err) {
             showToast(err.message || 'Invalid credentials', 'error');
@@ -51,16 +61,17 @@ function initAuth() {
     document.getElementById('signup-form').addEventListener('submit', async (e) => {
         e.preventDefault();
         const name = document.getElementById('signup-name').value;
+        const username = document.getElementById('signup-username').value;
         const email = document.getElementById('signup-email').value;
         const password = document.getElementById('signup-password').value;
         const confirm = document.getElementById('signup-confirm').value;
         if (password !== confirm) { showToast('Passwords do not match!', 'error'); return; }
         try {
-            const res = await AuthAPI.signup({ name, email, password });
+            const res = await AuthAPI.signup({ name, username, email, password });
             Auth.setToken(res.token);
             AppState.currentUser = res;
             AppState.isAuthenticated = true;
-            showApp();
+            checkUserSetupAndShowApp();
             showToast('Account created!');
         } catch (err) {
             showToast(err.message || 'Signup failed', 'error');
@@ -69,23 +80,92 @@ function initAuth() {
 
     document.getElementById('show-signup').addEventListener('click', (e) => {
         e.preventDefault();
-        document.getElementById('login-page').classList.add('hidden');
+        document.querySelectorAll('.auth-page').forEach(p => p.classList.add('hidden'));
         document.getElementById('signup-page').classList.remove('hidden');
     });
 
     document.getElementById('show-login').addEventListener('click', (e) => {
         e.preventDefault();
-        document.getElementById('signup-page').classList.add('hidden');
+        document.querySelectorAll('.auth-page').forEach(p => p.classList.add('hidden'));
         document.getElementById('login-page').classList.remove('hidden');
+    });
+
+    document.getElementById('show-forgot-password').addEventListener('click', (e) => {
+        e.preventDefault();
+        document.querySelectorAll('.auth-page').forEach(p => p.classList.add('hidden'));
+        document.getElementById('forgot-password-page').classList.remove('hidden');
+    });
+
+    document.getElementById('back-to-login').addEventListener('click', (e) => {
+        e.preventDefault();
+        document.querySelectorAll('.auth-page').forEach(p => p.classList.add('hidden'));
+        document.getElementById('login-page').classList.remove('hidden');
+    });
+
+    document.getElementById('reset-back-to-login').addEventListener('click', (e) => {
+        e.preventDefault();
+        document.querySelectorAll('.auth-page').forEach(p => p.classList.add('hidden'));
+        document.getElementById('login-page').classList.remove('hidden');
+    });
+
+    document.getElementById('forgot-password-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = document.getElementById('forgot-email').value;
+        try {
+            const res = await AuthAPI.forgotPassword({ email });
+            showToast(res.message || 'Reset link sent!');
+            document.getElementById('forgot-email').value = '';
+        } catch (err) {
+            showToast(err.message || 'Failed to send reset link', 'error');
+        }
+    });
+
+    document.getElementById('reset-password-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const newPassword = document.getElementById('reset-new-password').value;
+        const confirm = document.getElementById('reset-confirm-password').value;
+        if (newPassword !== confirm) { showToast('Passwords do not match!', 'error'); return; }
+        
+        try {
+            const res = await AuthAPI.resetPassword({ token: tokenParam, newPassword });
+            showToast(res.message || 'Password reset successful!');
+            document.querySelectorAll('.auth-page').forEach(p => p.classList.add('hidden'));
+            document.getElementById('login-page').classList.remove('hidden');
+        } catch (err) {
+            showToast(err.message || 'Failed to reset password', 'error');
+        }
+    });
+
+    document.getElementById('set-username-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const username = document.getElementById('new-username').value;
+        try {
+            const res = await UserAPI.setUsername({ username });
+            AppState.currentUser.username = res.username;
+            closeModal('set-username-modal');
+            showToast('Username set successfully!');
+            showApp();
+        } catch (err) {
+            showToast(err.message || 'Failed to set username', 'error');
+        }
     });
 
     document.getElementById('logout-btn').addEventListener('click', () => {
         Auth.clearToken();
         AppState.currentUser = null;
         AppState.isAuthenticated = false;
+        sessionStorage.removeItem('settlement_reminder_dismissed');
         hideApp();
         showToast('Logged out', 'success');
     });
+}
+
+function checkUserSetupAndShowApp() {
+    if (!AppState.currentUser.username) {
+        showModal('set-username-modal');
+    } else {
+        showApp();
+    }
 }
 
 function showApp() {
@@ -98,8 +178,7 @@ function showApp() {
 function hideApp() {
     document.getElementById('app-container').classList.add('hidden');
     document.getElementById('auth-container').classList.remove('hidden');
-    document.getElementById('login-form').reset();
-    document.getElementById('signup-form').reset();
+    document.querySelectorAll('.auth-form').forEach(f => f.reset());
 }
 
 // ===== Navigation =====
@@ -148,9 +227,41 @@ async function loadDashboard() {
 
         renderRecentExpenses(data.recentExpenses || []);
         renderBalanceSummary(data.balances || []);
+
+        // Settlement Reminders
+        if (data.pendingSettlementCount > 0 && !sessionStorage.getItem('settlement_reminder_dismissed')) {
+            renderSettlementReminder(data.pendingSettlements);
+            showModal('settlement-reminder-modal');
+        }
+
     } catch (err) {
         showToast('Failed to load dashboard: ' + err.message, 'error');
     }
+}
+
+function renderSettlementReminder(settlements) {
+    const container = document.getElementById('reminder-settlements-list');
+    container.innerHTML = settlements.map(s => {
+        const isReceiver = s.receiverId === AppState.currentUser.userId;
+        return `
+            <div class="settlement-item" style="padding: 10px; border-bottom: 1px solid var(--border-color);">
+                <div style="font-weight: 500;">
+                    ${isReceiver ? `Confirm payment of ${DataHelpers.formatCurrency(s.amount)} from ${s.payerName}` : 
+                                   `Pending payment of ${DataHelpers.formatCurrency(s.amount)} to ${s.receiverName}`}
+                </div>
+            </div>`;
+    }).join('');
+    
+    document.getElementById('dismiss-reminder-btn').onclick = () => {
+        sessionStorage.setItem('settlement_reminder_dismissed', 'true');
+        closeModal('settlement-reminder-modal');
+    };
+    
+    document.getElementById('view-settlements-btn').onclick = () => {
+        sessionStorage.setItem('settlement_reminder_dismissed', 'true');
+        closeModal('settlement-reminder-modal');
+        navigateToPage('settlements');
+    };
 }
 
 function renderRecentExpenses(expenses) {
@@ -255,6 +366,10 @@ async function viewGroup(groupId) {
         // Show/hide Edit Members button (creator only)
         const editBtn = document.getElementById('edit-group-members-btn');
         editBtn.style.display = group.createdById === AppState.currentUser.userId ? 'inline-flex' : 'none';
+
+        // Show/hide Delete Group button (creator only)
+        const deleteBtn = document.getElementById('delete-group-btn');
+        deleteBtn.style.display = group.createdById === AppState.currentUser.userId ? 'inline-block' : 'none';
 
         renderGroupMembers(group);
         await loadGroupExpensesTab(groupId);
@@ -546,6 +661,7 @@ async function loadProfile() {
         const user = await UserAPI.me();
         AppState.currentUser = { ...AppState.currentUser, ...user };
         document.getElementById('profile-name').value = user.name;
+        document.getElementById('profile-username').value = user.username;
         document.getElementById('profile-email').value = user.email;
         const limit = user.monthlySpendingLimit || 0;
         document.getElementById('monthly-limit').value = limit || '';
@@ -645,9 +761,20 @@ function initModals() {
     document.getElementById('expense-form').addEventListener('submit', handleExpenseSubmit);
 
     // ── Settlement Modal ──
+    document.querySelectorAll('input[name="settlement-direction"]').forEach(radio => {
+        radio.addEventListener('change', () => {
+            const isPaying = radio.value === 'paying';
+            document.getElementById('settlement-person-label').textContent = isPaying ? 'Pay To' : 'Take From';
+        });
+    });
+
     document.getElementById('create-settlement-btn').addEventListener('click', async () => {
         const select = document.getElementById('settlement-receiver');
         const groupSelect = document.getElementById('settlement-group');
+        // Reset direction to 'paying' by default
+        document.querySelector('input[name="settlement-direction"][value="paying"]').checked = true;
+        document.getElementById('settlement-person-label').textContent = 'Pay To';
+
         try {
             const groups = await GroupAPI.list();
             // Build receiver list from all group members (excluding self)
@@ -667,12 +794,28 @@ function initModals() {
 
     document.getElementById('settlement-form').addEventListener('submit', async (e) => {
         e.preventDefault();
-        const receiverId = parseInt(document.getElementById('settlement-receiver').value);
+        const personId = parseInt(document.getElementById('settlement-receiver').value);
         const amount = parseFloat(document.getElementById('settlement-amount').value);
         const groupId = document.getElementById('settlement-group').value || null;
-        if (!receiverId || !amount) { showToast('Fill in all fields', 'error'); return; }
+        const direction = document.querySelector('input[name="settlement-direction"]:checked').value;
+        
+        if (!personId || !amount) { showToast('Fill in all fields', 'error'); return; }
+        
+        // If "Take From" is selected, the other person is the payer and current user is receiver
+        // We pass the "receiverId" field to the API, but the API creates:
+        // - if receiverId is given, currentUser is payer, receiverId is receiver
+        // - Wait, the API creates settlement where currentUser is always the payer if it only takes receiverId.
+        // Let's check API. Ah, the API (SettlementService) doesn't support setting someone else as payer. 
+        // Wait, the settlement request only takes receiverId. Let's fix that!
+        
+        // Actually, looking at SettlementAPI in backend, wait. 
+        // Let's pass receiverId as currentUser and payer as personId if Take From.
+        const payload = direction === 'paying' 
+            ? { receiverId: personId, amount, groupId: groupId ? parseInt(groupId) : null }
+            : { payerId: personId, amount, groupId: groupId ? parseInt(groupId) : null };
+
         try {
-            await SettlementAPI.create({ receiverId, amount, groupId: groupId ? parseInt(groupId) : null });
+            await SettlementAPI.create(payload);
             closeModal('settlement-modal');
             showToast('Settlement request sent!');
             if (AppState.currentPage === 'settlements') loadSettlements();
@@ -776,6 +919,19 @@ function initModals() {
             await GroupAPI.leave(AppState.currentGroupId);
             closeModal('group-details-modal');
             showToast('Left the group');
+            loadGroups();
+        } catch (err) {
+            showToast('Failed: ' + err.message, 'error');
+        }
+    });
+
+    // Delete group
+    document.getElementById('delete-group-btn').addEventListener('click', async () => {
+        if (!confirm('Are you sure you want to permanently delete this group? All expenses and settlements will be removed. This cannot be undone.')) return;
+        try {
+            await GroupAPI.delete(AppState.currentGroupId);
+            closeModal('group-details-modal');
+            showToast('Group deleted permanently');
             loadGroups();
         } catch (err) {
             showToast('Failed: ' + err.message, 'error');

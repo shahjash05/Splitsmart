@@ -12,6 +12,7 @@ public class AuthResponse {
     private String type = "Bearer";
     private Long userId;
     private String name;
+    private String username;
     private String email;
     private BigDecimal monthlySpendingLimit;
 }

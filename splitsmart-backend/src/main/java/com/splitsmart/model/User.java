@@ -16,6 +16,9 @@ public class User {
     @Column(nullable = false, length = 100)
     private String name;
 
+    @Column(unique = true, length = 30)
+    private String username;
+
     @Column(nullable = false, unique = true, length = 150)
     private String email;
 
@@ -38,6 +41,7 @@ public class User {
     // Getters
     public Long getUserId() { return userId; }
     public String getName() { return name; }
+    public String getUsername() { return username; }
     public String getEmail() { return email; }
     public String getPassword() { return password; }
     public BigDecimal getMonthlySpendingLimit() { return monthlySpendingLimit; }
@@ -46,6 +50,7 @@ public class User {
     // Setters
     public void setUserId(Long userId) { this.userId = userId; }
     public void setName(String name) { this.name = name; }
+    public void setUsername(String username) { this.username = username; }
     public void setEmail(String email) { this.email = email; }
     public void setPassword(String password) { this.password = password; }
     public void setMonthlySpendingLimit(BigDecimal monthlySpendingLimit) { this.monthlySpendingLimit = monthlySpendingLimit; }
@@ -56,6 +61,7 @@ public class User {
     public static class Builder {
         private final User user = new User();
         public Builder name(String v) { user.name = v; return this; }
+        public Builder username(String v) { user.username = v; return this; }
         public Builder email(String v) { user.email = v; return this; }
         public Builder password(String v) { user.password = v; return this; }
         public Builder monthlySpendingLimit(BigDecimal v) { user.monthlySpendingLimit = v; return this; }

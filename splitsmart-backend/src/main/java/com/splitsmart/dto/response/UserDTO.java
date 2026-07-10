@@ -10,6 +10,7 @@ import java.math.BigDecimal;
 public class UserDTO {
     private Long userId;
     private String name;
+    private String username;
     private String email;
     private BigDecimal monthlySpendingLimit;
 }

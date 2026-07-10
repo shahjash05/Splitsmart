@@ -62,12 +62,15 @@ const DataHelpers = {
 const AuthAPI = {
     login: (data) => apiCall('POST', '/auth/login', data),
     signup: (data) => apiCall('POST', '/auth/signup', data),
+    forgotPassword: (data) => apiCall('POST', '/auth/forgot-password', data),
+    resetPassword: (data) => apiCall('POST', '/auth/reset-password', data),
 };
 
 // Users
 const UserAPI = {
     me: () => apiCall('GET', '/users/me'),
     update: (data) => apiCall('PUT', '/users/me', data),
+    setUsername: (data) => apiCall('PUT', '/users/me/username', data),
     changePassword: (data) => apiCall('PUT', '/users/me/password', data),
     searchByEmail: (email) => apiCall('GET', `/users/search?email=${encodeURIComponent(email)}`),
 };
@@ -79,6 +82,7 @@ const GroupAPI = {
     get: (id) => apiCall('GET', `/groups/${id}`),
     updateMembers: (id, data) => apiCall('PUT', `/groups/${id}/members`, data),
     leave: (id) => apiCall('DELETE', `/groups/${id}/leave`),
+    delete: (id) => apiCall('DELETE', `/groups/${id}`),
     expenses: (id) => apiCall('GET', `/groups/${id}/expenses`),
     balances: (id) => apiCall('GET', `/groups/${id}/balances`),
 };

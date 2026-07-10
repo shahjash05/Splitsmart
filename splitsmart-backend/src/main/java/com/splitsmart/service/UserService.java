@@ -35,9 +35,28 @@ public class UserService {
             }
             currentUser.setEmail(req.getEmail());
         }
+        if (req.getUsername() != null && !req.getUsername().isBlank()) {
+            if (!req.getUsername().equals(currentUser.getUsername()) &&
+                    userRepository.existsByUsername(req.getUsername())) {
+                throw new BadRequestException("Username already taken");
+            }
+            currentUser.setUsername(req.getUsername());
+        }
         if (req.getMonthlySpendingLimit() != null) {
             currentUser.setMonthlySpendingLimit(req.getMonthlySpendingLimit());
         }
+        userRepository.save(currentUser);
+        return toDTO(currentUser);
+    }
+
+    public UserDTO setUsername(User currentUser, String username) {
+        if (username == null || username.isBlank() || username.length() < 3 || username.length() > 30) {
+            throw new BadRequestException("Username must be between 3 and 30 characters");
+        }
+        if (userRepository.existsByUsername(username)) {
+            throw new BadRequestException("Username already taken: " + username);
+        }
+        currentUser.setUsername(username);
         userRepository.save(currentUser);
         return toDTO(currentUser);
     }
@@ -65,6 +84,7 @@ public class UserService {
         return UserDTO.builder()
                 .userId(user.getUserId())
                 .name(user.getName())
+                .username(user.getUsername())
                 .email(user.getEmail())
                 .monthlySpendingLimit(user.getMonthlySpendingLimit())
                 .build();

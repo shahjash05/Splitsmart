@@ -7,8 +7,8 @@ import java.math.BigDecimal;
 
 @Data
 public class CreateSettlementRequest {
-    @NotNull
-    private Long receiverId;
+    private Long receiverId; // For "Pay To" (current user is payer)
+    private Long payerId;    // For "Take From" (current user is receiver)
 
     @NotNull @Positive
     private BigDecimal amount;

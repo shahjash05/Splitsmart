@@ -8,6 +8,7 @@ USE splitsmart;
 CREATE TABLE IF NOT EXISTS users (
     user_id     BIGINT AUTO_INCREMENT PRIMARY KEY,
     name        VARCHAR(100) NOT NULL,
+    username    VARCHAR(30) UNIQUE,
     email       VARCHAR(150) NOT NULL UNIQUE,
     password    VARCHAR(255) NOT NULL,
     monthly_spending_limit DECIMAL(10,2) DEFAULT NULL,
@@ -93,3 +94,13 @@ INSERT IGNORE INTO categories (category_id, category_name, icon) VALUES
 (6, 'Health'),
 (7, 'Travel'),
 (8, 'Other');
+
+-- Password Reset Tokens
+CREATE TABLE IF NOT EXISTS password_reset_tokens (
+    id          BIGINT AUTO_INCREMENT PRIMARY KEY,
+    token       VARCHAR(255) NOT NULL UNIQUE,
+    user_id     BIGINT NOT NULL,
+    expires_at  DATETIME NOT NULL,
+    used        BOOLEAN DEFAULT FALSE,
+    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
+);

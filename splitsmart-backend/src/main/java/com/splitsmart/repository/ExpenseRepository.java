@@ -24,4 +24,6 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
             @Param("user") User user,
             @Param("start") LocalDate start,
             @Param("end") LocalDate end);
+
+    void deleteByGroup(Group group);
 }

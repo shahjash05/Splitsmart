@@ -11,6 +11,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/users")
 @RequiredArgsConstructor
@@ -27,6 +29,12 @@ public class UserController {
     public ResponseEntity<UserDTO> updateProfile(@AuthenticationPrincipal User user,
                                                   @RequestBody UpdateProfileRequest req) {
         return ResponseEntity.ok(userService.updateProfile(user, req));
+    }
+
+    @PutMapping("/me/username")
+    public ResponseEntity<UserDTO> setUsername(@AuthenticationPrincipal User user,
+                                               @RequestBody Map<String, String> body) {
+        return ResponseEntity.ok(userService.setUsername(user, body.get("username")));
     }
 
     @PutMapping("/me/password")

@@ -18,4 +18,6 @@ public class DashboardDTO {
     private boolean nearLimit;
     private List<ExpenseDTO> recentExpenses;
     private List<BalanceDTO> balances;
+    private int pendingSettlementCount;
+    private List<SettlementDTO> pendingSettlements;
 }
