@@ -1,5 +1,6 @@
 package com.splitsmart.repository;
 
+import com.splitsmart.model.Group;
 import com.splitsmart.model.Settlement;
 import com.splitsmart.model.Settlement.Status;
 import com.splitsmart.model.User;
