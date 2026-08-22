@@ -1136,6 +1136,34 @@ function initThemeToggle() {
     });
 }
 
+// ===== PWA Install Logic =====
+let deferredPrompt;
+function initPWA() {
+    const installBtn = document.getElementById('install-pwa-btn');
+    if (!installBtn) return;
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        installBtn.classList.remove('hidden');
+    });
+
+    installBtn.addEventListener('click', async () => {
+        if (!deferredPrompt) return;
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        console.log(`User response to the install prompt: ${outcome}`);
+        deferredPrompt = null;
+        installBtn.classList.add('hidden');
+    });
+
+    window.addEventListener('appinstalled', () => {
+        installBtn.classList.add('hidden');
+        deferredPrompt = null;
+        console.log('PWA was installed');
+    });
+}
+
 // ===== Init =====
 async function init() {
     const loadingScreen = document.getElementById('loading-screen');
@@ -1145,6 +1173,7 @@ async function init() {
     initNavigation();
     initModals();
     initThemeToggle();
+    initPWA();
 
     setTimeout(async () => {
         loadingScreen.style.display = 'none';
