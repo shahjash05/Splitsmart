@@ -1649,7 +1649,21 @@ body {
     
     .nav-brand span {
         display: inline-block; /* Keep the brand title visible */
-        font-size: 20px;
+        font-size: 18px;
+    }
+    
+    #install-pwa-btn {
+        padding: 6px 10px;
+        font-size: 12px;
+    }
+    
+    #install-pwa-btn span {
+        display: none;
+    }
+    
+    .auth-card {
+        padding: 24px;
+        margin: 0 16px;
     }
     
     /* Move navigation menu to bottom tab bar on mobile */
@@ -1758,8 +1772,8 @@ body {
     .modal-content {
         width: 95%;
         margin: 10px auto;
-        padding: 20px 16px;
-        border-radius: var(--border-radius-md);
+        padding: 24px 16px;
+        border-radius: var(--border-radius-sm);
         box-sizing: border-box;
     }
 
